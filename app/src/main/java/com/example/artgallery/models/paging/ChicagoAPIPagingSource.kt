@@ -8,13 +8,12 @@ import com.example.artgallery.utils.NetworkConstants
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class ChicagoAPIPagingSource(val received: (List<ArtWrapper.ArtFullInformation>) -> Unit) :
+class ChicagoAPIPagingSource(
+    private val api: ChicagoAPIService,
+    val received: (List<ArtWrapper.ArtFullInformation>,
+    ) -> Unit,
+) :
     PagingSource<Int, ArtWrapper.ArtFullInformation>() {
-    private val api = Retrofit.Builder()
-        .baseUrl(NetworkConstants.GET_ARTWORK_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(ChicagoAPIService::class.java)
 
     override fun getRefreshKey(state: PagingState<Int, ArtWrapper.ArtFullInformation>): Int? {
         return state.anchorPosition
@@ -30,7 +29,7 @@ class ChicagoAPIPagingSource(val received: (List<ArtWrapper.ArtFullInformation>)
             val body = response.body()
 
             if (!response.isSuccessful || body == null) {
-                return LoadResult.Error(Exception(""))
+                return LoadResult.Error(Exception("Not found"))
             }
 
             val current = body.pagination?.current_page ?: 0
