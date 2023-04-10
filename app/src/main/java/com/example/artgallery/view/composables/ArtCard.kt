@@ -18,14 +18,15 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.artgallery.models.dto.ArtBasicInformation
 import com.example.artgallery.ui.theme.ArtGalleryTheme
 import com.example.artgallery.R
+import com.example.artgallery.models.dto.ArtHolder.ArtBasicInformation
 
 typealias OnClick = (Int) -> Unit
 
@@ -81,7 +82,9 @@ private fun ArtImage(artInformation: ArtBasicInformation) {
 @Composable
 private fun AuthorName(artInformation: ArtBasicInformation) {
     Text(
-        text = artInformation.author,
+        text = artInformation.author.ifBlank { "Unknown" },
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
         style = TextStyle(
             fontSize = 14.sp,
             fontWeight = FontWeight.W400,
@@ -95,6 +98,8 @@ private fun AuthorName(artInformation: ArtBasicInformation) {
 private fun ArtTitle(artInformation: ArtBasicInformation) {
     Text(
         text = artInformation.title,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
         style = TextStyle(
             fontSize = 20.sp,
             fontWeight = FontWeight.W500,

@@ -3,19 +3,23 @@ package com.example.artgallery.models.dto
 import com.example.artgallery.models.poko.ChicagoAPIResponse
 import java.util.Calendar
 
-data class ArtWrapper(
-    val artList: List<ArtFullInformation>,
-    val pages: Int,
-    val error: String? = null
-) {
+typealias BasicInformationList = MutableList<ArtHolder.ArtBasicInformation>
+typealias BasicInformationWrapper = ArtHolder.ArtWrapper<BasicInformationList>
+typealias FullInformationWrapper = ArtHolder.ArtWrapper<ArtHolder.ArtFullInformation?>
+
+sealed class ArtHolder {
+
     data class ArtFullInformation(
         val id: Int,
         val title: String,
         val author: String,
         val imageId: String,
         val altText: String?,
+        val desc: String?,
         private val lastUpdate: Calendar?,
+        val chips: Map<String, List<String>>,
         val additionalData: Map<String, String>,
+        var favorite: Boolean = false,
     ) {
         val imageUrl: String get() = "https://www.artic.edu/iiif/2/$imageId/full/843,/0/default.jpg"
 
@@ -37,34 +41,93 @@ data class ArtWrapper(
         private val year get() = lastUpdate?.let { Calendar.YEAR }
     }
 
+    data class ArtBasicInformation(
+        val id: Int,
+        val title: String,
+        val author: String,
+        private val imageId: String,
+        val alt: String? = null
+    ) {
+        val imageUrl: String get() = "https://www.artic.edu/iiif/2/$imageId/full/843,/0/default.jpg"
+    }
+
+    sealed class ArtState(val id: Int, open val msg: String?) {
+        class Loading : ArtState(msg = null, id = LOADING_ID)
+        class InitialLoading : ArtState(msg = "Loading...", id = INITIAL_LOADING_ID)
+        class Done : ArtState(msg = null, id = DONE_ID)
+        class Error(private val message: String?) : ArtState(msg = message, id = ERROR_ID) {
+            override val msg: String
+                get() = message ?: "Unknown Error"
+        }
+
+        companion object {
+            const val LOADING_ID: Int = 0
+            const val INITIAL_LOADING_ID: Int = 1
+            const val DONE_ID: Int = 2
+            const val ERROR_ID: Int = 3
+
+            val LOADING: ArtState = Loading()
+            val INITIAL_LOADING: ArtState = InitialLoading()
+            val DONE: ArtState = Done()
+            fun fromError(message: String?): ArtState = Error(message = message)
+        }
+    }
+
+
+    data class ArtWrapper<T>(
+        var artData: T,
+        var state: ArtState = ArtState.DONE,
+    )
+
     companion object {
-        fun fromBody(apiResponse: ChicagoAPIResponse) =
+        fun fromBasicList() = ArtWrapper<BasicInformationList>(
+            artData = mutableListOf()
+        )
+
+        fun fromFullInformation() = ArtWrapper<ArtFullInformation?>(
+            artData = null,
+            state = ArtState.LOADING
+        )
+
+        fun fromBodyToBasicInformationList(apiResponse: ChicagoAPIResponse) =
             apiResponse.data?.filterNotNull()?.map { art ->
-                ArtFullInformation(
+                ArtBasicInformation(
                     id = art.id ?: 0,
                     title = art.title(),
-                    author = art.artist_title(),
-                    altText = art.thumbnail?.alt_text,
-                    imageId = art.image_id(),
-                    lastUpdate = getStringDate(art.source_updated_at),
-                    additionalData = mapOf(
-                        "Description" to art.provenance_text(),
-                        "Display Date" to art.date_display(),
-                        "Exhibition Place" to art.artist_display(),
-                        "Origin Place" to art.place_of_origin(),
-                        "Size" to art.dimensions(),
-                        "Credit Line" to art.credit_line(),
-                        "Verification Level" to art.publishing_verification_level(),
-                        "Public Domain" to if(art.is_public_domain == true) "Yes" else "No",
-                        "Type" to art.artwork_type_title(),
-                        "Categories" to data(art.category_titles)(),
-                        "Classifications" to data(art.classification_titles)()
-                    ),
+                    author = art.artistTitle(),
+                    imageId = art.imageId(),
+                    alt = art.thumbnail?.altText
                 )
             } ?: listOf()
 
-        private fun data(art: List<String?>?) =
-            art?.filterNotNull()?.joinToString(", ")
+        fun fromBodyToFullInformation(apiResponse: ChicagoAPIResponse.Data) =
+            apiResponse.let { art ->
+                ArtFullInformation(
+                    id = art.id ?: 0,
+                    title = art.title(),
+                    author = art.artistTitle(),
+                    altText = art.thumbnail?.altText,
+                    imageId = art.imageId(),
+                    lastUpdate = getStringDate(art.sourceUpdatedAt),
+                    desc = art.provenanceText,
+                    chips = mapOf(
+                        "Categories" to art.categoryTitles.removeNullEntries,
+                        "Classifications" to art.classificationTitles.removeNullEntries,
+                    ),
+                    additionalData = mapOf(
+                        "Display Date" to art.dateDisplay(),
+                        "Exhibition Place" to art.artistDisplay(),
+                        "Origin Place" to art.placeOfOrigin(),
+                        "Size" to art.dimensions(),
+                        "Credit Line" to art.creditLine(),
+                        "Verification Level" to art.publishingVerificationLevel(),
+                        "Public Domain" to if (art.isPublicDomain == true) "Yes" else "No",
+                        "Type" to art.artworkTypeTitle(),
+                    ),
+                )
+            }
+
+        private val List<String?>?.removeNullEntries get() = this?.filterNotNull() ?: listOf()
 
         private fun getStringDate(sourceUpdatedAt: String?): Calendar? {
             sourceUpdatedAt ?: return null
@@ -82,3 +145,5 @@ data class ArtWrapper(
         private operator fun String?.invoke() = this.orEmpty()
     }
 }
+
+operator fun BasicInformationWrapper.get(index: Int) = this.artData[index]

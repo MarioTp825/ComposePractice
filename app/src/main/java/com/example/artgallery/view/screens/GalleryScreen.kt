@@ -1,84 +1,73 @@
 package com.example.artgallery.view.screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.artgallery.ui.theme.ArtGalleryTheme
+import com.example.artgallery.models.dto.ArtHolder
 import com.example.artgallery.view.composables.ArtCard
 import com.example.artgallery.viewModels.ArtWorkViewModel
-
-@Composable
-private fun BuildTopBar() =
-    TopAppBar(
-        title = { Text("ArtGallery") }
-    )
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun GalleryScreen(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
-    Scaffold(
-        topBar = { BuildTopBar() },
-    ) { padding ->
-        Box(modifier = Modifier.padding(paddingValues = padding)) {
-            ArtCardList(viewModel, onClick)
-        }
-    }
+    ArtCardList(viewModel, onClick)
 }
 
 @Composable
 fun ArtCardList(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
-    val lazyArtWorks = viewModel.pager.collectAsLazyPagingItems()
-    LazyColumn {
-        items(lazyArtWorks.itemCount) { index ->
-            lazyArtWorks[index]?.let {
-                Box(modifier = Modifier.padding(5.dp)) {
-                    ArtCard(
-                        artInformation = it.basic,
-                        onClick = onClick
-                    )
+    val lazyArtWorks by viewModel.basicInformationState.collectAsState(ArtHolder.fromBasicList())
+    LaunchedEffect(Unit, Dispatchers.IO) {
+        viewModel.loadPage()
+    }
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+
+        itemsIndexed(
+            items =lazyArtWorks.artData,
+            key = { index, item -> index }
+        ) { index, item ->
+            ArtCard(
+                artInformation = item,
+                onClick = onClick
+            )
+            if(index == viewModel.lastIndex()) {
+                LaunchedEffect(Unit, Dispatchers.IO) {
+                    viewModel.loadPage()
                 }
             }
         }
 
         lazyArtWorks.apply {
-            when {
-                loadState.refresh is LoadState.Loading -> {
-                    item { Text("Loading...") }
-                }
-                loadState.append is LoadState.Loading -> {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
+            if (state is ArtHolder.ArtState.Error)
+                item { Text("Error: ${state.msg}") }
 
+            if (state is ArtHolder.ArtState.InitialLoading)
+                item { Text("Loading...") }
+
+            if (state is ArtHolder.ArtState.Loading)
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
+
                 }
-                loadState.refresh is LoadState.Error -> {
-                    val e = lazyArtWorks.loadState.refresh as LoadState.Error
-                    item { Text("Error: ${e.error}") }
-                }
-                loadState.append is LoadState.Error -> {
-                    val e = lazyArtWorks.loadState.append as LoadState.Error
-                    item { Text("Error: ${e.error}") }
-                }
-            }
         }
 
     }
 }
+
+fun currentTime(): String = System.currentTimeMillis().toString()

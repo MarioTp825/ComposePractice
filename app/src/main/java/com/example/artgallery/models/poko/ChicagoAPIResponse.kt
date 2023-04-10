@@ -1,161 +1,290 @@
 package com.example.artgallery.models.poko
 
-
 import androidx.annotation.Keep
+
+import com.google.gson.annotations.SerializedName
+
+data class ChicagoFullResponse(
+    @SerializedName("data")
+    val data: ChicagoAPIResponse.Data? = null
+)
 
 @Keep
 data class ChicagoAPIResponse(
+    @SerializedName("config")
     val config: Config? = null,
+    @SerializedName("data")
     val `data`: List<Data?>? = null,
+    @SerializedName("info")
     val info: Info? = null,
+    @SerializedName("pagination")
     val pagination: Pagination? = null
 ) {
     @Keep
     data class Config(
-        val iiif_url: String? = null,
-        val website_url: String? = null
+        @SerializedName("iiif_url")
+        val iiifUrl: String? = null,
+        @SerializedName("website_url")
+        val websiteUrl: String? = null
     )
 
     @Keep
     data class Data(
-        val alt_artist_ids: List<Int?>? = null,
-        val alt_classification_ids: List<String?>? = null,
-        val alt_image_ids: List<String?>? = null,
-        val alt_material_ids: List<String?>? = null,
-        val alt_style_ids: List<String?>? = null,
-        val alt_subject_ids: List<Any?>? = null,
-        val alt_technique_ids: List<Any?>? = null,
-        val alt_titles: List<String?>? = null,
-        val api_link: String? = null,
-        val api_model: String? = null,
-        val artist_display: String? = null,
-        val artist_id: Int? = null,
-        val artist_ids: List<Int?>? = null,
-        val artist_title: String? = null,
-        val artist_titles: List<String?>? = null,
-        val artwork_type_id: Int? = null,
-        val artwork_type_title: String? = null,
-        val boost_rank: Any? = null,
-        val catalogue_display: Any? = null,
-        val category_ids: List<String?>? = null,
-        val category_titles: List<String?>? = null,
-        val classification_id: String? = null,
-        val classification_ids: List<String?>? = null,
-        val classification_title: String? = null,
-        val classification_titles: List<String?>? = null,
+        @SerializedName("alt_artist_ids")
+        val altArtistIds: List<Any?>? = null,
+        @SerializedName("alt_classification_ids")
+        val altClassificationIds: List<String?>? = null,
+        @SerializedName("alt_image_ids")
+        val altImageIds: List<Any?>? = null,
+        @SerializedName("alt_material_ids")
+        val altMaterialIds: List<String?>? = null,
+        @SerializedName("alt_style_ids")
+        val altStyleIds: List<Any?>? = null,
+        @SerializedName("alt_subject_ids")
+        val altSubjectIds: List<String?>? = null,
+        @SerializedName("alt_technique_ids")
+        val altTechniqueIds: List<String?>? = null,
+        @SerializedName("alt_titles")
+        val altTitles: Any? = null,
+        @SerializedName("api_link")
+        val apiLink: String? = null,
+        @SerializedName("api_model")
+        val apiModel: String? = null,
+        @SerializedName("artist_display")
+        val artistDisplay: String? = null,
+        @SerializedName("artist_id")
+        val artistId: Int? = null,
+        @SerializedName("artist_ids")
+        val artistIds: List<Int?>? = null,
+        @SerializedName("artist_title")
+        val artistTitle: String? = null,
+        @SerializedName("artist_titles")
+        val artistTitles: List<String?>? = null,
+        @SerializedName("artwork_type_id")
+        val artworkTypeId: Int? = null,
+        @SerializedName("artwork_type_title")
+        val artworkTypeTitle: String? = null,
+        @SerializedName("boost_rank")
+        val boostRank: Any? = null,
+        @SerializedName("catalogue_display")
+        val catalogueDisplay: Any? = null,
+        @SerializedName("category_ids")
+        val categoryIds: List<String?>? = null,
+        @SerializedName("category_titles")
+        val categoryTitles: List<String?>? = null,
+        @SerializedName("classification_id")
+        val classificationId: String? = null,
+        @SerializedName("classification_ids")
+        val classificationIds: List<String?>? = null,
+        @SerializedName("classification_title")
+        val classificationTitle: String? = null,
+        @SerializedName("classification_titles")
+        val classificationTitles: List<String?>? = null,
+        @SerializedName("color")
         val color: Color? = null,
+        @SerializedName("colorfulness")
         val colorfulness: Double? = null,
-        val copyright_notice: Any? = null,
-        val credit_line: String? = null,
-        val date_display: String? = null,
-        val date_end: Int? = null,
-        val date_qualifier_id: Int? = null,
-        val date_qualifier_title: String? = null,
-        val date_start: Int? = null,
-        val department_id: String? = null,
-        val department_title: String? = null,
+        @SerializedName("copyright_notice")
+        val copyrightNotice: Any? = null,
+        @SerializedName("credit_line")
+        val creditLine: String? = null,
+        @SerializedName("date_display")
+        val dateDisplay: String? = null,
+        @SerializedName("date_end")
+        val dateEnd: Int? = null,
+        @SerializedName("date_qualifier_id")
+        val dateQualifierId: Int? = null,
+        @SerializedName("date_qualifier_title")
+        val dateQualifierTitle: String? = null,
+        @SerializedName("date_start")
+        val dateStart: Int? = null,
+        @SerializedName("department_id")
+        val departmentId: String? = null,
+        @SerializedName("department_title")
+        val departmentTitle: String? = null,
+        @SerializedName("dimensions")
         val dimensions: String? = null,
-        val document_ids: List<Any?>? = null,
-        val exhibition_history: String? = null,
-        val fiscal_year: Int? = null,
-        val fiscal_year_deaccession: Any? = null,
-        val gallery_id: Any? = null,
-        val gallery_title: Any? = null,
-        val has_advanced_imaging: Boolean? = null,
-        val has_educational_resources: Boolean? = null,
-        val has_multimedia_resources: Boolean? = null,
-        val has_not_been_viewed_much: Boolean? = null,
+        @SerializedName("document_ids")
+        val documentIds: List<Any?>? = null,
+        @SerializedName("exhibition_history")
+        val exhibitionHistory: String? = null,
+        @SerializedName("fiscal_year")
+        val fiscalYear: Int? = null,
+        @SerializedName("fiscal_year_deaccession")
+        val fiscalYearDeaccession: Any? = null,
+        @SerializedName("gallery_id")
+        val galleryId: Any? = null,
+        @SerializedName("gallery_title")
+        val galleryTitle: Any? = null,
+        @SerializedName("has_advanced_imaging")
+        val hasAdvancedImaging: Boolean? = null,
+        @SerializedName("has_educational_resources")
+        val hasEducationalResources: Boolean? = null,
+        @SerializedName("has_multimedia_resources")
+        val hasMultimediaResources: Boolean? = null,
+        @SerializedName("has_not_been_viewed_much")
+        val hasNotBeenViewedMuch: Boolean? = null,
+        @SerializedName("id")
         val id: Int? = null,
-        val image_id: String? = null,
+        @SerializedName("image_id")
+        val imageId: String? = null,
+        @SerializedName("inscriptions")
         val inscriptions: String? = null,
-        val internal_department_id: Int? = null,
-        val is_boosted: Boolean? = null,
-        val is_on_view: Boolean? = null,
-        val is_public_domain: Boolean? = null,
-        val is_zoomable: Boolean? = null,
+        @SerializedName("internal_department_id")
+        val internalDepartmentId: Int? = null,
+        @SerializedName("is_boosted")
+        val isBoosted: Boolean? = null,
+        @SerializedName("is_on_view")
+        val isOnView: Boolean? = null,
+        @SerializedName("is_public_domain")
+        val isPublicDomain: Boolean? = null,
+        @SerializedName("is_zoomable")
+        val isZoomable: Boolean? = null,
+        @SerializedName("latitude")
         val latitude: Any? = null,
+        @SerializedName("latlon")
         val latlon: Any? = null,
+        @SerializedName("longitude")
         val longitude: Any? = null,
-        val main_reference_number: String? = null,
-        val material_id: String? = null,
-        val material_ids: List<String?>? = null,
-        val material_titles: List<String?>? = null,
-        val max_zoom_window_size: Int? = null,
-        val medium_display: String? = null,
-        val on_loan_display: Any? = null,
-        val place_of_origin: String? = null,
-        val provenance_text: String? = null,
-        val publication_history: String? = null,
-        val publishing_verification_level: String? = null,
-        val section_ids: List<Any?>? = null,
-        val section_titles: List<Any?>? = null,
-        val site_ids: List<Any?>? = null,
-        val sound_ids: List<Any?>? = null,
-        val source_updated_at: String? = null,
-        val style_id: String? = null,
-        val style_ids: List<String?>? = null,
-        val style_title: String? = null,
-        val style_titles: List<String?>? = null,
-        val subject_id: String? = null,
-        val subject_ids: List<String?>? = null,
-        val subject_titles: List<String?>? = null,
-        val suggest_autocomplete_all: List<SuggestAutocompleteAll?>? = null,
-        val technique_id: String? = null,
-        val technique_ids: List<String?>? = null,
-        val technique_titles: List<String?>? = null,
-        val term_titles: List<String?>? = null,
-        val text_ids: List<Any?>? = null,
-        val theme_titles: List<Any?>? = null,
+        @SerializedName("main_reference_number")
+        val mainReferenceNumber: String? = null,
+        @SerializedName("material_id")
+        val materialId: String? = null,
+        @SerializedName("material_ids")
+        val materialIds: List<String?>? = null,
+        @SerializedName("material_titles")
+        val materialTitles: List<String?>? = null,
+        @SerializedName("max_zoom_window_size")
+        val maxZoomWindowSize: Int? = null,
+        @SerializedName("medium_display")
+        val mediumDisplay: String? = null,
+        @SerializedName("on_loan_display")
+        val onLoanDisplay: Any? = null,
+        @SerializedName("place_of_origin")
+        val placeOfOrigin: String? = null,
+        @SerializedName("provenance_text")
+        val provenanceText: String? = null,
+        @SerializedName("publication_history")
+        val publicationHistory: String? = null,
+        @SerializedName("publishing_verification_level")
+        val publishingVerificationLevel: String? = null,
+        @SerializedName("section_ids")
+        val sectionIds: List<Any?>? = null,
+        @SerializedName("section_titles")
+        val sectionTitles: List<Any?>? = null,
+        @SerializedName("site_ids")
+        val siteIds: List<Any?>? = null,
+        @SerializedName("sound_ids")
+        val soundIds: List<Any?>? = null,
+        @SerializedName("source_updated_at")
+        val sourceUpdatedAt: String? = null,
+        @SerializedName("style_id")
+        val styleId: String? = null,
+        @SerializedName("style_ids")
+        val styleIds: List<String?>? = null,
+        @SerializedName("style_title")
+        val styleTitle: String? = null,
+        @SerializedName("style_titles")
+        val styleTitles: List<String?>? = null,
+        @SerializedName("subject_id")
+        val subjectId: String? = null,
+        @SerializedName("subject_ids")
+        val subjectIds: List<String?>? = null,
+        @SerializedName("subject_titles")
+        val subjectTitles: List<String?>? = null,
+        @SerializedName("suggest_autocomplete_all")
+        val suggestAutocompleteAll: List<SuggestAutocompleteAll?>? = null,
+        @SerializedName("technique_id")
+        val techniqueId: String? = null,
+        @SerializedName("technique_ids")
+        val techniqueIds: List<String?>? = null,
+        @SerializedName("technique_titles")
+        val techniqueTitles: List<String?>? = null,
+        @SerializedName("term_titles")
+        val termTitles: List<String?>? = null,
+        @SerializedName("text_ids")
+        val textIds: List<Any?>? = null,
+        @SerializedName("theme_titles")
+        val themeTitles: List<String?>? = null,
+        @SerializedName("thumbnail")
         val thumbnail: Thumbnail? = null,
+        @SerializedName("timestamp")
         val timestamp: String? = null,
+        @SerializedName("title")
         val title: String? = null,
-        val updated_at: String? = null,
-        val video_ids: List<Any?>? = null
+        @SerializedName("updated_at")
+        val updatedAt: String? = null,
+        @SerializedName("video_ids")
+        val videoIds: List<Any?>? = null
     ) {
         @Keep
         data class Color(
+            @SerializedName("h")
             val h: Int? = null,
+            @SerializedName("l")
             val l: Int? = null,
+            @SerializedName("percentage")
             val percentage: Double? = null,
+            @SerializedName("population")
             val population: Int? = null,
+            @SerializedName("s")
             val s: Int? = null
         )
 
         @Keep
         data class SuggestAutocompleteAll(
+            @SerializedName("contexts")
             val contexts: Contexts? = null,
+            @SerializedName("input")
             val input: List<String?>? = null,
+            @SerializedName("weight")
             val weight: Int? = null
         ) {
             @Keep
             data class Contexts(
+                @SerializedName("groupings")
                 val groupings: List<String?>? = null
             )
         }
 
         @Keep
         data class Thumbnail(
-            val alt_text: String? = null,
+            @SerializedName("alt_text")
+            val altText: String? = null,
+            @SerializedName("height")
             val height: Int? = null,
+            @SerializedName("lqip")
             val lqip: String? = null,
+            @SerializedName("width")
             val width: Int? = null
         )
     }
 
     @Keep
     data class Info(
-        val license_links: List<String?>? = null,
-        val license_text: String? = null,
+        @SerializedName("license_links")
+        val licenseLinks: List<String?>? = null,
+        @SerializedName("license_text")
+        val licenseText: String? = null,
+        @SerializedName("version")
         val version: String? = null
     )
 
     @Keep
     data class Pagination(
-        val current_page: Int? = null,
+        @SerializedName("current_page")
+        val currentPage: Int? = null,
+        @SerializedName("limit")
         val limit: Int? = null,
-        val next_url: String? = null,
+        @SerializedName("next_url")
+        val nextUrl: String? = null,
+        @SerializedName("offset")
         val offset: Int? = null,
+        @SerializedName("prev_url")
+        val prevUrl: String? = null,
+        @SerializedName("total")
         val total: Int? = null,
-        val total_pages: Int? = null
+        @SerializedName("total_pages")
+        val totalPages: Int? = null
     )
 }
