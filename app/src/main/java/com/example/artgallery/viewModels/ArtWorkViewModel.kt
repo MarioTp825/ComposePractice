@@ -2,7 +2,6 @@ package com.example.artgallery.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.artgallery.models.api.ChicagoAPIService
 import com.example.artgallery.models.db.ArtObjectBox
 import com.example.artgallery.models.dto.*
 import com.example.artgallery.models.dto.ArtHolder.ArtState
@@ -13,31 +12,26 @@ import com.example.artgallery.models.dto.database.ArtFullInformationEntity
 import com.example.artgallery.models.repository.contracts.ArtDataBaseRepository
 import com.example.artgallery.models.repository.contracts.ChicagoAPIRepository
 import com.example.artgallery.models.repository.implementation.ArtDataBaseRepositoryImpl
-import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
-import com.example.artgallery.utils.NetworkConstants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 typealias ArtListService = suspend (String?) -> List<ArtHolder.ArtFullInformation>
 
-class ArtWorkViewModel : ViewModel() {
-    private var _query: String? = null
-    val isSearch: Boolean get() = _query != null
+class ArtWorkViewModel(
+    private val repository: ChicagoAPIRepository
+) : ViewModel() {
+    private var _query = MutableStateFlow<String?>(null)
+    val isSearch: Boolean get() = _query.value != null
 
     private val dataBase: ArtDataBaseRepository = ArtDataBaseRepositoryImpl(
         artBox = ArtObjectBox.boxFor(ArtFullInformationEntity::class.java)
     )
-    private val repository: ChicagoAPIRepository = ChicagoAPIRepositoryImpl(
-        api = buildChicagoService()
-    )
 
-    val basicListWrapper = ArtHolder.fromBasicList()
+    private val basicListWrapper = ArtHolder.fromBasicList()
     private val mutableStateCache = MutableStateFlow(value = ArtHolder.fromBasicList())
     val basicInformationState: StateFlow<BasicInformationWrapper> = mutableStateCache
 
@@ -45,21 +39,11 @@ class ArtWorkViewModel : ViewModel() {
     private val mutableStateDetail = MutableStateFlow(value = ArtHolder.fromFullInformation())
     val artDetailState: StateFlow<FullInformationWrapper> = mutableStateDetail
 
-    val queryFlow: Flow<String>
-        get() = flow {
-            emit(_query.orEmpty())
-        }
-
-    val query: String get() = _query.orEmpty()
-
-    private fun buildChicagoService() = Retrofit.Builder()
-        .baseUrl(NetworkConstants.GET_ARTWORK_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-        .create(ChicagoAPIService::class.java)
+    val queryFlow: StateFlow<String?> =_query
+    val query: String get() = _query.value.orEmpty()
 
     fun loadPage() {
-        if (_query != null) loadSearchPage(_query)
+        if (_query.value != null) loadSearchPage(_query.value)
         else loadNormalPage()
     }
 
@@ -85,8 +69,8 @@ class ArtWorkViewModel : ViewModel() {
 
     private fun loadPageFromService(query: String?, service: ArtListService) {
         if (isLoading(basicListWrapper.state) || repository.isAtLastPage) return
-        if (query != this._query) {
-            _query = query
+        if (query != this._query.value) {
+            _query.value = query
             clearCache()
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -118,7 +102,7 @@ class ArtWorkViewModel : ViewModel() {
 
     private suspend fun fetchPageIntoData(service: ArtListService) {
         basicListWrapper.artData.addAll(
-            service(_query)
+            service(_query.value)
         )
         basicListWrapper.artData.distinctBy { it.id }
     }
@@ -133,7 +117,7 @@ class ArtWorkViewModel : ViewModel() {
 
     //Single Art
     fun findArtById(id: Int?) {
-        id ?: return
+        id ?: throw NullPointerException("Id cannot be null")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 requestArtDetailFromService(id)

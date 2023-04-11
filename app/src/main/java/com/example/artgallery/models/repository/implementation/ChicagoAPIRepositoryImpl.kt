@@ -5,7 +5,6 @@ import com.example.artgallery.models.dto.ArtHolder
 import com.example.artgallery.models.dto.ArtHolder.ArtFullInformation
 import com.example.artgallery.models.poko.*
 import com.example.artgallery.models.repository.contracts.ChicagoAPIRepository
-import com.example.artgallery.utils.NetworkConstants
 import retrofit2.Response
 
 typealias NullCheckAction<T> = (T) -> Boolean
@@ -21,7 +20,6 @@ class ChicagoAPIRepositoryImpl(
     override suspend fun getArtWorksPage(): List<ArtFullInformation> {
         if (this.isAtLastPage) throw IndexOutOfBoundsException("No more pages to query")
         val response = api.getArtWorkPage(
-            limit = NetworkConstants.MAX_ITEMS_PAGINATION,
             page = currentPage
         )
         val body = buildArtPageResponseCheck(response)
@@ -48,7 +46,10 @@ class ChicagoAPIRepositoryImpl(
     }
 
     override suspend fun search(query: String): List<ArtFullInformation> {
-        val response = api.searchArtWork(query = query)
+        val response = api.searchArtWork(
+            query = query,
+            page = currentPage
+        )
         val body = buildArtSearchPageResponseCheck(response)
         updatePages(body)
         return ArtHolder.fromSearchBodyToFullInformationList(body)

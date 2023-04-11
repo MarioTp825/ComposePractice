@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.artgallery.models.dto.ArtHolder
 
@@ -15,7 +16,7 @@ fun LazyListScope.loadingStates(
     state: ArtHolder.ArtState,
 ) {
     if (state is ArtHolder.ArtState.Error)
-        item { Text("Error: ${state.msg}") }
+        item { ErrorLoading(state) }
 
     if (state is ArtHolder.ArtState.InitialLoading)
         item { InitialLoadingView() }
@@ -25,10 +26,20 @@ fun LazyListScope.loadingStates(
 }
 
 @Composable
+private fun ErrorLoading(state: ArtHolder.ArtState.Error) {
+    Box(
+        modifier = Modifier.fillMaxWidth().testTag("errorLoading"),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text("Error: ${state.msg}")
+    }
+}
+
+@Composable
 private fun FetchLoadingView() {
     Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier.fillMaxWidth().testTag("fetchLoading"),
+        contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator()
     }
@@ -39,7 +50,8 @@ private fun LazyItemScope.InitialLoadingView() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .fillParentMaxHeight(),
+            .fillParentMaxHeight()
+            .testTag("initialLoading"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

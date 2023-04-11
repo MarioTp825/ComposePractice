@@ -7,16 +7,16 @@ import com.example.artgallery.models.repository.implementation.ArtDataBaseReposi
 import io.mockk.every
 import io.mockk.mockk
 import io.objectbox.Box
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
+import org.junit.Before
+import org.junit.Test
 
 internal class ArtDataBaseRepositoryImplTest {
     private lateinit var box: Box<ArtFullInformationEntity>
     private lateinit var repository: ArtDataBaseRepository
 
-    @BeforeEach
+    @Before
     fun setUp() {
         box = mockk()
         every { box.all } returns getAllData()
@@ -45,7 +45,6 @@ internal class ArtDataBaseRepositoryImplTest {
     }
 
     @Test
-    @Tag("getFavorite")
     fun givenCorrectId_whenGettingArt_thenReturnObject() {
         assertEquals(
             repository.getFavorite(1),
@@ -55,7 +54,6 @@ internal class ArtDataBaseRepositoryImplTest {
     }
 
     @Test
-    @Tag("getFavorite")
     fun givenIncorrectId_whenGettingArt_thenReturnNull() {
         assertEquals(
             repository.getFavorite(5),
@@ -64,7 +62,6 @@ internal class ArtDataBaseRepositoryImplTest {
     }
 
     @Test
-    @Tag("deleteFavorite")
     fun givenCorrectId_whenRemovingArt_thenReturnNothing() {
         assertThrows(Exception::class.java) {
             repository.removeFromFavorites(baseArt(id = 2))
@@ -73,7 +70,6 @@ internal class ArtDataBaseRepositoryImplTest {
     }
 
     @Test
-    @Tag("deleteFavorite")
     fun givenIncorrectId_whenRemovingArt_thenReturnThrowException() {
         assertThrows(Exception::class.java) {
             repository.removeFromFavorites(baseArt(id = 5))

@@ -52,16 +52,18 @@ android {
                 useLegacyPackaging true
             }
         }
-        unitTests.all {
-            useJUnitPlatform()
+        unitTests {
+            includeAndroidResources = true
         }
+//        unitTests.all {
+//            useJUnitPlatform()
+//        }
     }
 }
 
 dependencies {
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
-    androidTestImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation 'junit:junit:4.12'
     constraints {
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
             because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
@@ -83,9 +85,10 @@ dependencies {
     def mockLibraryAgent = "1.13.1"
     testImplementation 'io.mockk:mockk:1.13.4'
 //    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.2'
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'io.mockk:mockk:1.13.4'
     androidTestImplementation "io.mockk:mockk-android:1.13.4"
-//    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation "io.mockk:mockk-agent:${mockLibraryAgent}"
     androidTestImplementation "androidx.test:runner:1.5.2"
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

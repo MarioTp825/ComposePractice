@@ -2,8 +2,7 @@ package com.example.artgallery.models.repository
 
 import com.example.artgallery.models.api.ChicagoAPIService
 import com.example.artgallery.models.dto.ArtHolder
-import com.example.artgallery.models.poko.ChicagoAPIResponse
-import com.example.artgallery.models.poko.ChicagoFullResponse
+import com.example.artgallery.models.poko.*
 import com.example.artgallery.models.repository.contracts.ChicagoAPIRepository
 import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
 import com.example.artgallery.utils.NetworkConstants
@@ -12,10 +11,9 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Tag
-import org.junit.jupiter.api.Test
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
 
 import retrofit2.Response
 
@@ -25,7 +23,7 @@ class ChicagoAPIRepositoryImplTest {
     private val max = NetworkConstants.MAX_ITEMS_PAGINATION
     private lateinit var repository: ChicagoAPIRepository
 
-    @BeforeEach
+    @Before
     fun before() {
         setUpAPIPageResponses()
         setUpAPISingleResponse()
@@ -51,6 +49,16 @@ class ChicagoAPIRepositoryImplTest {
             404,
             "error".toResponseBody("application/json".toMediaType())
         )
+
+        coEvery {
+            api.searchArtWork("first", page = 1)
+        } returns Response.success(getSearchDataFist())
+        coEvery {
+            api.searchArtWork("first", page = 2)
+        } returns Response.success(getSearchDataSecond())
+        coEvery {
+            api.searchArtWork("second", page = 1)
+        } returns Response.success(getSearchDataThird())
     }
 
     private fun setUpAPISingleResponse() {
@@ -79,7 +87,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("page")
     fun givenFirstPageRequest_whenAPIResponseSuccessful_thenGetDataBack() {
         runBlocking {
             val response = repository.getArtWorksPage()
@@ -91,7 +98,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("page")
     fun givenSecondPageRequest_whenAPIResponseSuccessful_thenGetDataDifferentData() {
         runBlocking {
             repository.getArtWorksPage()
@@ -104,7 +110,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("page")
     fun givenThirdPageRequest_whenAPIResponseSuccessfulButNull_thenThrowNullPointerException() {
         assertThrows(NullPointerException::class.java) {
             runBlocking {
@@ -116,7 +121,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("page")
     fun givenFourthPageRequest_whenAPIResponseUnsuccessful_thenThrowException() {
         runBlocking {
             try {
@@ -134,7 +138,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("detail")
     fun givenFistDetailRequest_whenAPIResponseSuccessful_thenGetData() {
         runBlocking {
             val response = repository.getArtDetails(1)
@@ -146,7 +149,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("detail")
     fun givenSecondDetailRequest_whenAPIResponseNull_thenThrowNullException() {
         assertThrows(NullPointerException::class.java) {
             runBlocking {
@@ -156,7 +158,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("detail")
     fun givenThirdDetailRequest_whenAPIResponseUnsuccessful_thenThrowException() {
         assertThrows(Exception::class.java) {
             runBlocking {
@@ -166,7 +167,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("detail")
     fun givenFourthDetailRequest_whenAPIResponseSuccessful_thenGetDifferentData() {
         runBlocking {
             val response = repository.getArtDetails(4)
@@ -178,7 +178,6 @@ class ChicagoAPIRepositoryImplTest {
     }
 
     @Test
-    @Tag("detail")
     fun givenFifthDetailRequest_whenAPIResponseIncorrect_thenThrowException() {
         assertThrows(Exception::class.java) {
             runBlocking {
@@ -187,12 +186,39 @@ class ChicagoAPIRepositoryImplTest {
         }
     }
 
+    @Test
+    fun givenFistSearchRequest_whenAPIResponseCorrect_thenResetCount() {
+        runBlocking {
+            repository.getArtWorksPage()
+            repository.getArtWorksPage()
+            repository.clear()
+            val response = repository.search("first")
+            assertEquals(
+                response,
+                ArtHolder.fromSearchBodyToFullInformationList(getSearchDataFist())
+            )
+        }
+    }
+    @Test
+    fun givenDifferentSearchRequest_whenAPIResponseCorrect_thenResetSearch() {
+        runBlocking {
+            val resOne = repository.search("first")
+            repository.search("first")
+            repository.clear()
+            val resTwo = repository.search("second")
+            assertNotEquals(
+                resOne,
+                resTwo
+            )
+        }
+    }
+
     private fun getFakeResponseOne() = ChicagoAPIResponse(
         data = listOf(
-            ChicagoAPIResponse.FullData(id = 1),
-            ChicagoAPIResponse.FullData(id = 2),
-            ChicagoAPIResponse.FullData(id = 3),
-            ChicagoAPIResponse.FullData(id = 4),
+            ArtData.FullData(id = 1),
+            ArtData.FullData(id = 2),
+            ArtData.FullData(id = 3),
+            ArtData.FullData(id = 4),
         ),
         pagination = ChicagoAPIResponse.Pagination(
             totalPages = 4
@@ -201,21 +227,21 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFakeResponseTwo() = ChicagoAPIResponse(
         data = listOf(
-            ChicagoAPIResponse.FullData(id = 5),
-            ChicagoAPIResponse.FullData(id = 6),
-            ChicagoAPIResponse.FullData(id = 7),
-            ChicagoAPIResponse.FullData(id = 8),
+            ArtData.FullData(id = 5),
+            ArtData.FullData(id = 6),
+            ArtData.FullData(id = 7),
+            ArtData.FullData(id = 8),
         ),
         pagination = ChicagoAPIResponse.Pagination(
             totalPages = 4
         )
     )
 
-    private fun getFakeResponseThree(): ChicagoAPIResponse? = null
+    private fun getFakeResponseThree(): ChicagoAPIFullResponse? = null
 
     private fun getFullDataFirst() =
         ChicagoFullResponse(
-            fullData = ChicagoAPIResponse.FullData(
+            fullData = ArtData.FullData(
                 id = 1,
                 imageId = "1234"
             )
@@ -223,16 +249,58 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFullDataFourth() =
         ChicagoFullResponse(
-            fullData = ChicagoAPIResponse.FullData(
+            fullData = ArtData.FullData(
                 id = 4,
                 imageId = "4321"
             )
         )
 
     private fun getFullDataFifth() = ChicagoFullResponse(
-        fullData = ChicagoAPIResponse.FullData(
+        fullData = ArtData.FullData(
             id = 6,
             imageId = "2342"
+        )
+    )
+
+    private fun getSearchDataFist() = ChicagoAPISearchResponse(
+        data = listOf(
+            ArtData.SearchData(
+                id = 4,
+            ),
+            ArtData.SearchData(
+                id = 6,
+            ),
+        ),
+        pagination = ChicagoAPIResponse.Pagination(
+            totalPages = 2
+        )
+    )
+
+    private fun getSearchDataSecond() = ChicagoAPISearchResponse(
+        data = listOf(
+            ArtData.SearchData(
+                id = 7,
+            ),
+            ArtData.SearchData(
+                id = 8,
+            ),
+        ),
+        pagination = ChicagoAPIResponse.Pagination(
+            totalPages = 2
+        )
+    )
+
+    private fun getSearchDataThird() = ChicagoAPISearchResponse(
+        data = listOf(
+            ArtData.SearchData(
+                id = 9,
+            ),
+            ArtData.SearchData(
+                id = 10,
+            ),
+        ),
+        pagination = ChicagoAPIResponse.Pagination(
+            totalPages = 2
         )
     )
 }

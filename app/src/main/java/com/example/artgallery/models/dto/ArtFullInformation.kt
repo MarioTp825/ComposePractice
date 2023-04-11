@@ -59,7 +59,11 @@ sealed class ArtHolder {
 
         fun getBitmap(context: Context): ImageBitmap? =
             if (base64 == null || size == null) null
-            else getThumbnailScaled(context = context, base64, size, 50)
+            else try {
+                getThumbnailScaled(context = context, base64, size, 50)
+            } catch (e: Exception) {
+                null
+            }
     }
 
     sealed class ArtState(val id: Int, open val msg: String?) {

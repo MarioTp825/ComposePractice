@@ -16,22 +16,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.artgallery.models.api.ChicagoAPIService
 import com.example.artgallery.models.db.ArtObjectBox
+import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
 import com.example.artgallery.ui.theme.ArtGalleryTheme
+import com.example.artgallery.utils.NetworkConstants
 import com.example.artgallery.viewModels.ArtWorkViewModel
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: ArtWorkViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startDataBase()
         setContent {
             ArtGalleryTheme {
-                MainScreen(viewModel)
+                MainScreen()
             }
         }
     }
@@ -41,7 +46,14 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun MainScreen(viewModel: ArtWorkViewModel) {
+    private fun MainScreen() {
+        val viewModel = viewModel<ArtWorkViewModel> {
+            ArtWorkViewModel(
+                repository = ChicagoAPIRepositoryImpl(
+                    api = buildChicagoService()
+                )
+            )
+        }
         val navHostController = rememberNavController()
         Scaffold(
             topBar = { BuildTopBar(navHostController) }
@@ -56,6 +68,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun buildChicagoService() = Retrofit.Builder()
+        .baseUrl(NetworkConstants.GET_ARTWORK_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(ChicagoAPIService::class.java)
 
     @Composable
     private fun BuildTopBar(navHostController: NavHostController) {
@@ -100,15 +118,8 @@ private fun AppNavHost(viewModel: ArtWorkViewModel, navHostController: NavHostCo
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview(@PreviewParameter(ArtWorkViewModelPreviewProvider::class) viewModel: ArtWorkViewModel) {
+fun DefaultPreview() {
     ArtGalleryTheme {
         //AppNavHost(viewModel, navHostController)
     }
-}
-
-class ArtWorkViewModelPreviewProvider : PreviewParameterProvider<ArtWorkViewModel> {
-
-    override val values: Sequence<ArtWorkViewModel>
-        get() = sequenceOf(ArtWorkViewModel())
-
 }

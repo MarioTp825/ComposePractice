@@ -18,12 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +65,8 @@ fun ArtCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 10.dp, vertical = 15.dp),
+                .padding(horizontal = 10.dp, vertical = 15.dp)
+                .testTag("ArtRow"),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BuildCardContent(likeFlow, art, showLikeButton, onFavoriteTap)
@@ -106,6 +107,7 @@ fun LikeButton(
     val isChecked by likeFlow(art.id).collectAsState(initial = false)
     var temp by remember { mutableStateOf(isChecked) }
     IconButton(
+        modifier = Modifier.testTag("favButton"),
         onClick = {
             onFavoriteTap(isChecked)
             temp = !temp
@@ -121,24 +123,63 @@ fun LikeButton(
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-private fun ArtImage(artInformation: ArtBasicInformation) {
+private fun ArtImage(art: ArtBasicInformation) {
+    if (art.isImageIdEmpty) {
+        VariantImage(art)
+
+    } else {
+        OnlineImage(art)
+    }
+}
+
+@Composable
+fun ErrorImage() {
     Image(
-        painter = ,
-        contentDescription = artInformation.alt,
+        painter = painterResource(id = R.drawable.baseline_error_outline_24),
+        contentDescription = "Error",
         modifier = Modifier
             .size(50.dp)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .testTag("errorImage"),
         contentScale = ContentScale.Crop
     )
 }
 
 @Composable
-fun getPainterFromBasicInformation(art: ArtBasicInformation): Painter {
-    if(art.isImageIdEmpty) {
-        //art.getBitmap(LocalContext.current)?.pa
-    } else {
-        rememberImagePainter(art.imageUrl)
-    }
+private fun VariantImage(art: ArtBasicInformation) {
+    art.getBitmap(LocalContext.current)?.let {
+        Base64Image(it, art.alt)
+    } ?: ErrorImage()
+
+}
+
+@Composable
+private fun Base64Image(
+    bitmap: ImageBitmap,
+    alt: String?
+) {
+    Image(
+        bitmap = bitmap,
+        contentDescription = alt,
+        modifier = Modifier
+            .size(50.dp)
+            .clip(CircleShape)
+            .testTag("bitmapImage"),
+        contentScale = ContentScale.Crop
+    )
+}
+
+@Composable
+private fun OnlineImage(art: ArtBasicInformation) {
+    Image(
+        painter = rememberImagePainter(art.imageUrl),
+        contentDescription = art.alt,
+        modifier = Modifier
+            .size(50.dp)
+            .clip(CircleShape)
+            .testTag("onlineImage"),
+        contentScale = ContentScale.Crop
+    )
 }
 
 @Composable
@@ -152,7 +193,8 @@ private fun AuthorName(artInformation: ArtBasicInformation) {
             fontWeight = FontWeight.W400,
             fontStyle = FontStyle.Normal,
             color = Color.Black
-        )
+        ),
+        modifier = Modifier.testTag("authorArt")
     )
 }
 

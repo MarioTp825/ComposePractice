@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.example.artgallery.models.db.ArtObjectBox
 import com.example.artgallery.models.dto.ArtHolder
 import com.example.artgallery.models.dto.BasicInformationWrapper
+import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
 import com.example.artgallery.ui.theme.ArtGalleryTheme
 import com.example.artgallery.view.composables.ArtCard
 import com.example.artgallery.view.composables.loadingStates
@@ -20,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun GalleryScreen(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
-    var query: String? by remember { mutableStateOf(viewModel.query) }
+    val query: String? by viewModel.queryFlow.collectAsState(initial = viewModel.query)
     val lazyArtWorks by viewModel
         .basicInformationState
         .collectAsState(ArtHolder.fromBasicList())
@@ -29,8 +30,7 @@ fun GalleryScreen(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
             startValue = query.orEmpty(),
             modifier = Modifier.fillMaxWidth()
         ) {
-            query = it
-            viewModel.loadSearchPage(query)
+            viewModel.loadSearchPage(it)
         }
         ArtCardList(viewModel, lazyArtWorks, onClick)
     }
@@ -81,26 +81,25 @@ private fun LoadPage(service: suspend () -> Unit) {
 fun GalleryScreenPreview() {
     ArtObjectBox.init(LocalContext.current)
     ArtGalleryTheme {
-        ArtCardList(
-            viewModel = ArtWorkViewModel(),
-            lazyArtWorks = BasicInformationWrapper(
-                artData = mutableListOf(
-                    ArtHolder.ArtFullInformation(
-                        id = 1,
-                        title = "Title",
-                        author = "Author",
-                        lastUpdate = null,
-                        desc = null,
-                        additionalData = mapOf(),
-                        chips = mapOf(),
-                        imageId = "das",
-                        altText = null,
-                    )
-                )
-            ),
-            onClick = {
-
-            }
-        )
+//        ArtCardList(
+//            lazyArtWorks = BasicInformationWrapper(
+//                artData = mutableListOf(
+//                    ArtHolder.ArtFullInformation(
+//                        id = 1,
+//                        title = "Title",
+//                        author = "Author",
+//                        lastUpdate = null,
+//                        desc = null,
+//                        additionalData = mapOf(),
+//                        chips = mapOf(),
+//                        imageId = "das",
+//                        altText = null,
+//                    )
+//                )
+//            ),
+//            onClick = {
+//
+//            }
+//        )
     }
 }

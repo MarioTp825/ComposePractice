@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.artgallery.ui.theme.ArtGalleryTheme
@@ -31,6 +32,7 @@ fun SearchBox(
     OutlinedTextField(
         value = query,
         modifier = modifier
+            .testTag("searchText")
             .border(
                 border = BorderStroke(
                     1.dp, Color.Black
@@ -53,6 +55,7 @@ fun SearchBox(
 private fun cancelSearch(search: SearchListener): @Composable (() -> Unit) {
     return {
         IconButton(
+            modifier = Modifier.testTag("cancelIcon"),
             onClick = { search(null) }
         ) {
             Icon(
@@ -75,6 +78,7 @@ private fun textFieldColors() = TextFieldDefaults.textFieldColors(
 @Composable
 private fun SearchButton(search: SearchListener, query: String) {
     IconButton(
+        modifier = Modifier.testTag("searchIcon"),
         onClick = {
             search(query.ifEmpty { null })
         }

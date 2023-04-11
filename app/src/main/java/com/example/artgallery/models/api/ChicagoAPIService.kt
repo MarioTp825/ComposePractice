@@ -23,6 +23,8 @@ interface ChicagoAPIService {
 
     @GET("artworks/search/")
     suspend fun searchArtWork(
-        @Query("q") query: String
+        @Query("q") query: String,
+        @Query("limit") limit: Int = NetworkConstants.MAX_ITEMS_PAGINATION,
+        @Query("page") page: Int,
     ): Response<ChicagoAPISearchResponse>
 }
