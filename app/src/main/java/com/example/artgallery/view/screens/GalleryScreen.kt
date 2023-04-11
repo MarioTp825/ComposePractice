@@ -3,71 +3,104 @@ package com.example.artgallery.view.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import com.example.artgallery.view.composables.SearchBox
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.artgallery.models.db.ArtObjectBox
 import com.example.artgallery.models.dto.ArtHolder
+import com.example.artgallery.models.dto.BasicInformationWrapper
+import com.example.artgallery.ui.theme.ArtGalleryTheme
 import com.example.artgallery.view.composables.ArtCard
+import com.example.artgallery.view.composables.loadingStates
 import com.example.artgallery.viewModels.ArtWorkViewModel
 import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun GalleryScreen(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
-    ArtCardList(viewModel, onClick)
+    var query: String? by remember { mutableStateOf(viewModel.query) }
+    val lazyArtWorks by viewModel
+        .basicInformationState
+        .collectAsState(ArtHolder.fromBasicList())
+    Column {
+        SearchBox(
+            startValue = query.orEmpty(),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            query = it
+            viewModel.loadSearchPage(query)
+        }
+        ArtCardList(viewModel, lazyArtWorks, onClick)
+    }
+
 }
 
 @Composable
-fun ArtCardList(viewModel: ArtWorkViewModel, onClick: (Int) -> Unit) {
-    val lazyArtWorks by viewModel.basicInformationState.collectAsState(ArtHolder.fromBasicList())
-    LaunchedEffect(Unit, Dispatchers.IO) {
-        viewModel.loadPage()
-    }
+fun ArtCardList(
+    viewModel: ArtWorkViewModel,
+    lazyArtWorks: BasicInformationWrapper,
+    onClick: (Int) -> Unit
+) {
+    LoadPage { viewModel.loadPage() }
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
     ) {
 
         itemsIndexed(
-            items =lazyArtWorks.artData,
-            key = { index, item -> index }
+            items = lazyArtWorks.artData,
+            key = { index, _ -> index }
         ) { index, item ->
             ArtCard(
-                artInformation = item,
-                onClick = onClick
+                likeFlow = { viewModel.favoriteState(it) },
+                art = item,
+                onClick = onClick,
+                showLikeButton = !viewModel.isSearch,
+                onFavoriteTap = { remove -> viewModel.changeFavorites(remove, item) }
             )
-            if(index == viewModel.lastIndex()) {
-                LaunchedEffect(Unit, Dispatchers.IO) {
-                    viewModel.loadPage()
-                }
+            if (index == viewModel.lastIndex()) {
+                LoadPage { viewModel.loadPage() }
             }
         }
 
-        lazyArtWorks.apply {
-            if (state is ArtHolder.ArtState.Error)
-                item { Text("Error: ${state.msg}") }
-
-            if (state is ArtHolder.ArtState.InitialLoading)
-                item { Text("Loading...") }
-
-            if (state is ArtHolder.ArtState.Loading)
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-
-                }
-        }
-
+        loadingStates(lazyArtWorks.state)
     }
 }
 
-fun currentTime(): String = System.currentTimeMillis().toString()
+@Composable
+private fun LoadPage(service: suspend () -> Unit) {
+    LaunchedEffect(Unit, Dispatchers.IO) {
+        service()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GalleryScreenPreview() {
+    ArtObjectBox.init(LocalContext.current)
+    ArtGalleryTheme {
+        ArtCardList(
+            viewModel = ArtWorkViewModel(),
+            lazyArtWorks = BasicInformationWrapper(
+                artData = mutableListOf(
+                    ArtHolder.ArtFullInformation(
+                        id = 1,
+                        title = "Title",
+                        author = "Author",
+                        lastUpdate = null,
+                        desc = null,
+                        additionalData = mapOf(),
+                        chips = mapOf(),
+                        imageId = "das",
+                        altText = null,
+                    )
+                )
+            ),
+            onClick = {
+
+            }
+        )
+    }
+}

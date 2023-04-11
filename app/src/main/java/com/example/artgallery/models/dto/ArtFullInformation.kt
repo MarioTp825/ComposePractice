@@ -1,10 +1,17 @@
 package com.example.artgallery.models.dto
 
-import com.example.artgallery.models.poko.ChicagoAPIResponse
+import android.content.Context
+import android.util.Size
+import androidx.compose.ui.graphics.ImageBitmap
+import com.example.artgallery.models.dto.ArtHolder.Companion.invoke
+import com.example.artgallery.models.poko.ArtData
+import com.example.artgallery.models.poko.ChicagoAPIFullResponse
+import com.example.artgallery.models.poko.ChicagoAPISearchResponse
+import com.example.artgallery.utils.getThumbnailScaled
 import java.util.Calendar
 
-typealias BasicInformationList = MutableList<ArtHolder.ArtBasicInformation>
-typealias BasicInformationWrapper = ArtHolder.ArtWrapper<BasicInformationList>
+typealias FullInformationList = MutableList<ArtHolder.ArtFullInformation>
+typealias BasicInformationWrapper = ArtHolder.ArtWrapper<FullInformationList>
 typealias FullInformationWrapper = ArtHolder.ArtWrapper<ArtHolder.ArtFullInformation?>
 
 sealed class ArtHolder {
@@ -17,6 +24,8 @@ sealed class ArtHolder {
         val altText: String?,
         val desc: String?,
         private val lastUpdate: Calendar?,
+        private val base64: String? = null,
+        private val size: Size? = null,
         val chips: Map<String, List<String>>,
         val additionalData: Map<String, String>,
         var favorite: Boolean = false,
@@ -30,15 +39,9 @@ sealed class ArtHolder {
                 author = author,
                 imageId = imageId,
                 alt = altText,
+                size = size,
+                base64 = base64
             )
-
-        val updatedSince: String
-            get() = if (lastUpdate == null) ""
-            else "$day/$month/$year"
-
-        private val day get() = lastUpdate?.let { Calendar.DAY_OF_MONTH }
-        private val month get() = lastUpdate?.let { Calendar.MONTH }
-        private val year get() = lastUpdate?.let { Calendar.YEAR }
     }
 
     data class ArtBasicInformation(
@@ -46,9 +49,17 @@ sealed class ArtHolder {
         val title: String,
         val author: String,
         private val imageId: String,
-        val alt: String? = null
+        val alt: String? = null,
+        private val base64: String? = null,
+        private val size: Size? = null,
     ) {
         val imageUrl: String get() = "https://www.artic.edu/iiif/2/$imageId/full/843,/0/default.jpg"
+
+        val isImageIdEmpty: Boolean get() = imageId.isEmpty()
+
+        fun getBitmap(context: Context): ImageBitmap? =
+            if (base64 == null || size == null) null
+            else getThumbnailScaled(context = context, base64, size, 50)
     }
 
     sealed class ArtState(val id: Int, open val msg: String?) {
@@ -80,7 +91,7 @@ sealed class ArtHolder {
     )
 
     companion object {
-        fun fromBasicList() = ArtWrapper<BasicInformationList>(
+        fun fromBasicList() = ArtWrapper<FullInformationList>(
             artData = mutableListOf()
         )
 
@@ -89,18 +100,12 @@ sealed class ArtHolder {
             state = ArtState.LOADING
         )
 
-        fun fromBodyToBasicInformationList(apiResponse: ChicagoAPIResponse) =
+        fun fromBodyToFullInformationList(apiResponse: ChicagoAPIFullResponse) =
             apiResponse.data?.filterNotNull()?.map { art ->
-                ArtBasicInformation(
-                    id = art.id ?: 0,
-                    title = art.title(),
-                    author = art.artistTitle(),
-                    imageId = art.imageId(),
-                    alt = art.thumbnail?.altText
-                )
+                fromBodyToFullInformation(art)
             } ?: listOf()
 
-        fun fromBodyToFullInformation(apiResponse: ChicagoAPIResponse.Data) =
+        fun fromBodyToFullInformation(apiResponse: ArtData.FullData) =
             apiResponse.let { art ->
                 ArtFullInformation(
                     id = art.id ?: 0,
@@ -110,6 +115,12 @@ sealed class ArtHolder {
                     imageId = art.imageId(),
                     lastUpdate = getStringDate(art.sourceUpdatedAt),
                     desc = art.provenanceText,
+                    base64 = art.thumbnail?.lqip?.split("base64,")?.last(),
+                    size = art.thumbnail?.height?.let { h ->
+                        art.thumbnail.width?.let { w ->
+                            Size(w, h)
+                        }
+                    },
                     chips = mapOf(
                         "Categories" to art.categoryTitles.removeNullEntries,
                         "Classifications" to art.classificationTitles.removeNullEntries,
@@ -143,6 +154,33 @@ sealed class ArtHolder {
         }
 
         private operator fun String?.invoke() = this.orEmpty()
+        fun fromSearchBodyToFullInformationList(apiResponse: ChicagoAPISearchResponse): List<ArtFullInformation> =
+            apiResponse.data?.filterNotNull()?.map { art ->
+                fromSearchBodyToFullInformation(art)
+            } ?: listOf()
+
+        private fun fromSearchBodyToFullInformation(apiResponse: ArtData.SearchData) =
+            apiResponse.let { art ->
+                ArtFullInformation(
+                    id = art.id ?: 0,
+                    title = art.title(),
+                    author = "Unknown",
+                    altText = art.thumbnail?.altText,
+                    imageId = "",
+                    lastUpdate = null,
+                    desc = null,
+                    chips = mapOf(),
+                    additionalData = mapOf(),
+                    base64 = art.thumbnail?.lqip?.split("base64,")?.last(),
+                    size = art.thumbnail?.height?.let { h ->
+                        art.thumbnail.width?.let { w ->
+                            Size(w, h)
+                        }
+                    },
+                )
+            }
+
+
     }
 }
 

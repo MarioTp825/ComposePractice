@@ -81,8 +81,10 @@ private fun AppNavHost(viewModel: ArtWorkViewModel, navHostController: NavHostCo
         startDestination = AppScreen.ArtGalleryScreen.route
     ) {
         composable(AppScreen.ArtGalleryScreen.route) {
-            GalleryScreen(viewModel = viewModel) {
-                navHostController.navigate(AppScreen.ArtDetailScreen.getRoute(it))
+            GalleryScreen(
+                viewModel = viewModel,
+            ) { id ->
+                navHostController.navigate(AppScreen.ArtDetailScreen.getRoute(id))
             }
         }
         composable(AppScreen.ArtDetailScreen.route) {

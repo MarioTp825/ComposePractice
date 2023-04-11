@@ -34,17 +34,22 @@ import com.example.artgallery.viewModels.ArtWorkViewModel
 import kotlinx.coroutines.Dispatchers
 import java.util.*
 
-typealias OnBackClick = () -> Unit
+typealias OnBackClick = (Int?) -> Unit
 
 @Composable
 fun ArtDetailScreen(viewModel: ArtWorkViewModel, id: Int?, click: OnBackClick) {
     val artWork by viewModel.artDetailState.collectAsState(ArtHolder.fromFullInformation())
+    var favorite: Int? by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit, Dispatchers.IO) { viewModel.findArtById(id) }
 
     when (artWork.state) {
-        is ArtHolder.ArtState.Done -> ShowArtWorkDetails(artWork, click) {
+        is ArtHolder.ArtState.Done -> ShowArtWorkDetails(
+            artWork = artWork,
+            click = { click(favorite) }
+        ) {
             viewModel.changeFavorites(!it, artWork.artData)
+            viewModel.updateListFavorite(!it, artWork.artData?.id)
         }
         is ArtHolder.ArtState.Error -> ErrorMessage(artWork.state.msg)
         is ArtHolder.ArtState.InitialLoading,
@@ -91,7 +96,7 @@ fun ArtDetails(artWork: ArtFullInformation, click: OnBackClick, onFavoriteClick:
 
 @Composable
 private fun ArtDetailFooter(click: OnBackClick) {
-    Button(onClick = { click() }, shape = RoundedCornerShape(25.dp)) {
+    Button(onClick = { click(null) }, shape = RoundedCornerShape(25.dp)) {
         Text(text = "Done")
     }
 }

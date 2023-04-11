@@ -85,7 +85,7 @@ class ChicagoAPIRepositoryImplTest {
             val response = repository.getArtWorksPage()
             assertEquals(
                 response,
-                ArtHolder.fromBodyToBasicInformationList(getFakeResponseOne())
+                ArtHolder.fromBodyToFullInformationList(getFakeResponseOne())
             )
         }
     }
@@ -98,7 +98,7 @@ class ChicagoAPIRepositoryImplTest {
             val response = repository.getArtWorksPage()
             assertNotEquals(
                 response,
-                ArtHolder.fromBodyToBasicInformationList(getFakeResponseOne())
+                ArtHolder.fromBodyToFullInformationList(getFakeResponseOne())
             )
         }
     }
@@ -140,7 +140,7 @@ class ChicagoAPIRepositoryImplTest {
             val response = repository.getArtDetails(1)
             assertEquals(
                 response,
-                ArtHolder.fromBodyToFullInformation(getFullDataFirst().data!!)
+                ArtHolder.fromBodyToFullInformation(getFullDataFirst().fullData!!)
             )
         }
     }
@@ -172,7 +172,7 @@ class ChicagoAPIRepositoryImplTest {
             val response = repository.getArtDetails(4)
             assertNotEquals(
                 response,
-                ArtHolder.fromBodyToFullInformation(getFullDataFirst().data!!)
+                ArtHolder.fromBodyToFullInformation(getFullDataFirst().fullData!!)
             )
         }
     }
@@ -189,10 +189,10 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFakeResponseOne() = ChicagoAPIResponse(
         data = listOf(
-            ChicagoAPIResponse.Data(id = 1),
-            ChicagoAPIResponse.Data(id = 2),
-            ChicagoAPIResponse.Data(id = 3),
-            ChicagoAPIResponse.Data(id = 4),
+            ChicagoAPIResponse.FullData(id = 1),
+            ChicagoAPIResponse.FullData(id = 2),
+            ChicagoAPIResponse.FullData(id = 3),
+            ChicagoAPIResponse.FullData(id = 4),
         ),
         pagination = ChicagoAPIResponse.Pagination(
             totalPages = 4
@@ -201,10 +201,10 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFakeResponseTwo() = ChicagoAPIResponse(
         data = listOf(
-            ChicagoAPIResponse.Data(id = 5),
-            ChicagoAPIResponse.Data(id = 6),
-            ChicagoAPIResponse.Data(id = 7),
-            ChicagoAPIResponse.Data(id = 8),
+            ChicagoAPIResponse.FullData(id = 5),
+            ChicagoAPIResponse.FullData(id = 6),
+            ChicagoAPIResponse.FullData(id = 7),
+            ChicagoAPIResponse.FullData(id = 8),
         ),
         pagination = ChicagoAPIResponse.Pagination(
             totalPages = 4
@@ -215,7 +215,7 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFullDataFirst() =
         ChicagoFullResponse(
-            data = ChicagoAPIResponse.Data(
+            fullData = ChicagoAPIResponse.FullData(
                 id = 1,
                 imageId = "1234"
             )
@@ -223,14 +223,14 @@ class ChicagoAPIRepositoryImplTest {
 
     private fun getFullDataFourth() =
         ChicagoFullResponse(
-            data = ChicagoAPIResponse.Data(
+            fullData = ChicagoAPIResponse.FullData(
                 id = 4,
                 imageId = "4321"
             )
         )
 
     private fun getFullDataFifth() = ChicagoFullResponse(
-        data = ChicagoAPIResponse.Data(
+        fullData = ChicagoAPIResponse.FullData(
             id = 6,
             imageId = "2342"
         )

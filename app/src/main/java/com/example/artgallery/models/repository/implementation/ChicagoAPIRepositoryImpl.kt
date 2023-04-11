@@ -2,10 +2,8 @@ package com.example.artgallery.models.repository.implementation
 
 import com.example.artgallery.models.api.ChicagoAPIService
 import com.example.artgallery.models.dto.ArtHolder
-import com.example.artgallery.models.dto.ArtHolder.ArtBasicInformation
 import com.example.artgallery.models.dto.ArtHolder.ArtFullInformation
-import com.example.artgallery.models.poko.ChicagoAPIResponse
-import com.example.artgallery.models.poko.ChicagoFullResponse
+import com.example.artgallery.models.poko.*
 import com.example.artgallery.models.repository.contracts.ChicagoAPIRepository
 import com.example.artgallery.utils.NetworkConstants
 import retrofit2.Response
@@ -20,7 +18,7 @@ class ChicagoAPIRepositoryImpl(
     private var currentPage = 1
     private var totalPages = 2
 
-    override suspend fun getArtWorksPage(): List<ArtBasicInformation> {
+    override suspend fun getArtWorksPage(): List<ArtFullInformation> {
         if (this.isAtLastPage) throw IndexOutOfBoundsException("No more pages to query")
         val response = api.getArtWorkPage(
             limit = NetworkConstants.MAX_ITEMS_PAGINATION,
@@ -28,16 +26,16 @@ class ChicagoAPIRepositoryImpl(
         )
         val body = buildArtPageResponseCheck(response)
         updatePages(body)
-        return ArtHolder.fromBodyToBasicInformationList(body).distinctBy { it.id }
+        return ArtHolder.fromBodyToFullInformationList(body).distinctBy { it.id }
     }
 
-    private fun updatePages(body: ChicagoAPIResponse) {
+    private fun <T: ArtData> updatePages(body: ChicagoAPIResponse<T>) {
         currentPage++
         totalPages = body.pagination!!.totalPages!!
     }
 
     private fun buildArtPageResponseCheck(
-        response: Response<ChicagoAPIResponse>
+        response: Response<ChicagoAPIFullResponse>
     ) = checkForUnsuccessfulResponses(response) {
         it.data == null || it.pagination?.totalPages == null
     }
@@ -45,8 +43,26 @@ class ChicagoAPIRepositoryImpl(
     override suspend fun getArtDetails(id: Int): ArtFullInformation {
         val response = api.getArtWorkDetails(id = id)
         return ArtHolder.fromBodyToFullInformation(
-            buildArtDetailResponseCheck(response, id).data!!
+            buildArtDetailResponseCheck(response, id).fullData!!
         )
+    }
+
+    override suspend fun search(query: String): List<ArtFullInformation> {
+        val response = api.searchArtWork(query = query)
+        val body = buildArtSearchPageResponseCheck(response)
+        updatePages(body)
+        return ArtHolder.fromSearchBodyToFullInformationList(body)
+    }
+
+    override fun clear() {
+        currentPage = 1
+        totalPages = 2
+    }
+
+    private fun buildArtSearchPageResponseCheck(
+        response: Response<ChicagoAPISearchResponse>
+    ) = checkForUnsuccessfulResponses(response) {
+        it.data == null || it.pagination?.totalPages == null
     }
 
     override val isAtLastPage: Boolean
@@ -58,12 +74,12 @@ class ChicagoAPIRepositoryImpl(
     ) = checkForUnsuccessfulResponses(
         response = response,
         additionalCheckAction = {
-            if (it.data?.id != id)
-                "The expected Id was '$id', but '${it.data?.id}' was received"
+            if (it.fullData?.id != id)
+                "The expected Id was '$id', but '${it.fullData?.id}' was received"
             else null
         }
     ) {
-        it.data?.id == null || it.data.imageId == null
+        it.fullData?.id == null || it.fullData.imageId == null
     }
 
 

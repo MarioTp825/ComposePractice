@@ -6,30 +6,45 @@ import com.google.gson.annotations.SerializedName
 
 data class ChicagoFullResponse(
     @SerializedName("data")
-    val data: ChicagoAPIResponse.Data? = null
+    val fullData: ArtData.FullData? = null
 )
 
-@Keep
-data class ChicagoAPIResponse(
-    @SerializedName("config")
-    val config: Config? = null,
-    @SerializedName("data")
-    val `data`: List<Data?>? = null,
-    @SerializedName("info")
-    val info: Info? = null,
-    @SerializedName("pagination")
-    val pagination: Pagination? = null
-) {
+
+open class ArtData{
     @Keep
-    data class Config(
-        @SerializedName("iiif_url")
-        val iiifUrl: String? = null,
-        @SerializedName("website_url")
-        val websiteUrl: String? = null
+    data class Thumbnail(
+        @SerializedName("alt_text")
+        val altText: String? = null,
+        @SerializedName("height")
+        val height: Int? = null,
+        @SerializedName("lqip")
+        val lqip: String? = null,
+        @SerializedName("width")
+        val width: Int? = null
     )
 
     @Keep
-    data class Data(
+    data class SearchData(
+        @SerializedName("id")
+        val id: Int? = null,
+        @SerializedName("timestamp")
+        val timestamp: String? = null,
+        @SerializedName("title")
+        val title: String? = null,
+        @SerializedName("api_link")
+        val apiLink: String? = null,
+        @SerializedName("api_model")
+        val apiModel: String? = null,
+        @SerializedName("is_boosted")
+        val isBoosted: Boolean? = null,
+        @SerializedName("_score")
+        val score: Double? = null,
+        @SerializedName("thumbnail")
+        val thumbnail: Thumbnail? = null,
+    ): ArtData()
+
+    @Keep
+    data class FullData(
         @SerializedName("alt_artist_ids")
         val altArtistIds: List<Any?>? = null,
         @SerializedName("alt_classification_ids")
@@ -216,7 +231,7 @@ data class ChicagoAPIResponse(
         val updatedAt: String? = null,
         @SerializedName("video_ids")
         val videoIds: List<Any?>? = null
-    ) {
+    ): ArtData() {
         @Keep
         data class Color(
             @SerializedName("h")
@@ -246,19 +261,27 @@ data class ChicagoAPIResponse(
                 val groupings: List<String?>? = null
             )
         }
-
-        @Keep
-        data class Thumbnail(
-            @SerializedName("alt_text")
-            val altText: String? = null,
-            @SerializedName("height")
-            val height: Int? = null,
-            @SerializedName("lqip")
-            val lqip: String? = null,
-            @SerializedName("width")
-            val width: Int? = null
-        )
     }
+}
+
+@Keep
+data class ChicagoAPIResponse<T: ArtData>(
+    @SerializedName("config")
+    val config: Config? = null,
+    @SerializedName("data")
+    val data: List<T?>? = null,
+    @SerializedName("info")
+    val info: Info? = null,
+    @SerializedName("pagination")
+    val pagination: Pagination? = null
+) {
+    @Keep
+    data class Config(
+        @SerializedName("iiif_url")
+        val iiifUrl: String? = null,
+        @SerializedName("website_url")
+        val websiteUrl: String? = null
+    )
 
     @Keep
     data class Info(
@@ -288,3 +311,6 @@ data class ChicagoAPIResponse(
         val totalPages: Int? = null
     )
 }
+
+typealias ChicagoAPIFullResponse = ChicagoAPIResponse<ArtData.FullData>
+typealias ChicagoAPISearchResponse = ChicagoAPIResponse<ArtData.SearchData>
