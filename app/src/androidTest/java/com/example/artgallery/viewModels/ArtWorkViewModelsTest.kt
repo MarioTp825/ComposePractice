@@ -4,11 +4,13 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.artgallery.models.api.ChicagoAPIService
-import com.example.artgallery.models.db.ArtObjectBox
-import com.example.artgallery.models.dto.ArtHolder
+import com.example.artgallery.artWork.viewModels.ArtWorkViewModel
+import com.example.artgallery.artWork.models.api.ChicagoAPIService
+import com.example.artgallery.artWork.models.db.ArtObjectBox
+import com.example.artgallery.artWork.models.dto.ArtHolder
+import com.example.artgallery.artWork.models.poko.*
 import com.example.artgallery.models.poko.*
-import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
+import com.example.artgallery.artWork.models.repository.implementation.ChicagoAPIRepositoryImpl
 import com.example.artgallery.utils.NetworkConstants
 import io.mockk.coEvery
 import io.mockk.mockk

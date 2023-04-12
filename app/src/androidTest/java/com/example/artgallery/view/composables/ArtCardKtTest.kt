@@ -6,9 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.artgallery.models.dto.ArtHolder
+import com.example.artgallery.artWork.view.composables.ArtCard
+import com.example.artgallery.artWork.models.dto.ArtHolder
 import kotlinx.coroutines.flow.flow
 import org.junit.Assert.*
 import org.junit.Rule

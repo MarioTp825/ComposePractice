@@ -1,9 +1,9 @@
 package com.example.artgallery.models.repository
 
-import com.example.artgallery.models.dto.ArtHolder
-import com.example.artgallery.models.dto.database.ArtFullInformationEntity
-import com.example.artgallery.models.repository.contracts.ArtDataBaseRepository
-import com.example.artgallery.models.repository.implementation.ArtDataBaseRepositoryImpl
+import com.example.artgallery.artWork.models.dto.ArtHolder
+import com.example.artgallery.artWork.models.dto.database.ArtFullInformationEntity
+import com.example.artgallery.artWork.models.repository.contracts.ArtDataBaseRepository
+import com.example.artgallery.artWork.models.repository.implementation.ArtDataBaseRepositoryImpl
 import io.mockk.every
 import io.mockk.mockk
 import io.objectbox.Box

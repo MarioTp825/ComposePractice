@@ -1,22 +1,16 @@
 package com.example.artgallery.view.screens
 
 import androidx.activity.ComponentActivity
-import androidx.compose.material.Text
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.artgallery.viewModels.ArtWorkViewModel
-import androidx.compose.ui.test.junit4.createComposeRule
+import com.example.artgallery.artWork.viewModels.ArtWorkViewModel
 import androidx.compose.ui.test.onNodeWithText
-import com.example.artgallery.models.api.ChicagoAPIService
-import com.example.artgallery.models.poko.ChicagoAPIResponse
-import io.mockk.coEvery
+import com.example.artgallery.artWork.view.screens.ArtDetailScreen
 
-import io.mockk.every
 import io.mockk.mockk
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import retrofit2.Response
 
 @RunWith(AndroidJUnit4::class)
 class ArtDetailScreenTest {

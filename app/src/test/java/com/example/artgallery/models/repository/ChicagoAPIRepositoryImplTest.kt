@@ -1,10 +1,10 @@
 package com.example.artgallery.models.repository
 
-import com.example.artgallery.models.api.ChicagoAPIService
-import com.example.artgallery.models.dto.ArtHolder
-import com.example.artgallery.models.poko.*
-import com.example.artgallery.models.repository.contracts.ChicagoAPIRepository
-import com.example.artgallery.models.repository.implementation.ChicagoAPIRepositoryImpl
+import com.example.artgallery.artWork.models.api.ChicagoAPIService
+import com.example.artgallery.artWork.models.dto.ArtHolder
+import com.example.artgallery.artWork.models.poko.*
+import com.example.artgallery.artWork.models.repository.contracts.ChicagoAPIRepository
+import com.example.artgallery.artWork.models.repository.implementation.ChicagoAPIRepositoryImpl
 import com.example.artgallery.utils.NetworkConstants
 import io.mockk.coEvery
 import io.mockk.mockk

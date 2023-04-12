@@ -1,6 +1,7 @@
 package com.example.artgallery.viewModels
 
-import com.example.artgallery.models.dto.ArtHolder
+import com.example.artgallery.artWork.viewModels.ArtWorkViewModel
+import com.example.artgallery.artWork.models.dto.ArtHolder
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

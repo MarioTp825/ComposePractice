@@ -5,7 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.artgallery.models.dto.ArtHolder
+import com.example.artgallery.generics.view.composables.loadingStates
+import com.example.artgallery.artWork.models.dto.ArtHolder
 import org.junit.Assert.*
 import org.junit.Rule
 
